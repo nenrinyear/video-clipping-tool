@@ -1,0 +1,13 @@
+<Application x:Class="ClipX.App" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <Application.Resources>
+    <SolidColorBrush x:Key="Accent" Color="#6C63FF" />
+    <SolidColorBrush x:Key="Panel" Color="#181A20" />
+    <Style TargetType="Button">
+      <Setter Property="Foreground" Value="White"/><Setter Property="Background" Value="#2A2D36"/><Setter Property="BorderThickness" Value="0"/><Setter Property="Padding" Value="16,10"/><Setter Property="Cursor" Value="Hand"/><Setter Property="FontWeight" Value="SemiBold"/>
+      <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="Button"><Border Background="{TemplateBinding Background}" CornerRadius="8" Padding="{TemplateBinding Padding}"><ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/></Border></ControlTemplate></Setter.Value></Setter>
+    </Style>
+    <Style TargetType="Slider"><Setter Property="Foreground" Value="{StaticResource Accent}"/></Style>
+    <Style TargetType="TextBox"><Setter Property="Foreground" Value="White"/><Setter Property="Background" Value="#24262E"/><Setter Property="BorderBrush" Value="#363945"/><Setter Property="Padding" Value="8,6"/></Style>
+    <Style TargetType="RadioButton"><Setter Property="Foreground" Value="#E7E8EE"/><Setter Property="Margin" Value="0,0,18,0"/></Style>
+  </Application.Resources>
+</Application>

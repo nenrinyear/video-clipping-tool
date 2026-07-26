@@ -1,0 +1,11 @@
+bin/
+obj/
+.vs/
+publish/
+artifacts/
+tools/*.exe
+*.user
+*.nupkg
+*.snupkg
+.idea/
+.vscode/
