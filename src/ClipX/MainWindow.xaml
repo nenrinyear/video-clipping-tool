@@ -1,0 +1,37 @@
+<Window x:Class="ClipX.MainWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:local="clr-namespace:ClipX" xmlns:vlc="clr-namespace:LibVLCSharp.WPF;assembly=LibVLCSharp.WPF" Title="ClipX" Width="1100" Height="760" MinWidth="880" MinHeight="650" Background="#0E0F13" Foreground="White" FontFamily="Segoe UI" AllowDrop="True" Drop="Window_Drop" DragOver="Window_DragOver">
+  <Grid Margin="28">
+    <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+    <DockPanel Margin="0,0,0,20">
+      <StackPanel><TextBlock Text="ClipX" FontSize="28" FontWeight="Bold"/><TextBlock Text="X投稿用の動画を、軽く・速く・5MB以内に。" Foreground="#9296A3" Margin="0,3,0,0"/></StackPanel>
+      <Button DockPanel.Dock="Right" Content="動画を開く" Background="#6C63FF" Click="Open_Click" HorizontalAlignment="Right"/>
+    </DockPanel>
+    <Grid Grid.Row="1">
+      <Grid.ColumnDefinitions><ColumnDefinition Width="1.7*"/><ColumnDefinition Width="24"/><ColumnDefinition Width="1*"/></Grid.ColumnDefinitions>
+      <Border Background="#08090C" CornerRadius="12" ClipToBounds="True">
+        <vlc:VideoView x:Name="VideoView">
+        <Grid Background="#02000000" AllowDrop="True" DragOver="Window_DragOver" Drop="Window_Drop">
+          <StackPanel x:Name="DropHint" HorizontalAlignment="Center" VerticalAlignment="Center"><TextBlock Text="▣" FontSize="48" HorizontalAlignment="Center" Foreground="#646876"/><TextBlock Text="動画をここにドロップ" FontSize="18" FontWeight="SemiBold" Margin="0,12,0,4"/><TextBlock Text="MP4 / MOV / WebM など" Foreground="#7E8290" HorizontalAlignment="Center"/></StackPanel>
+          <Border VerticalAlignment="Bottom" Background="#E6111218" Padding="16,10"><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><Button x:Name="PlayButton" Content="▶" Width="42" Padding="8" Click="Play_Click"/><local:TimelineRangeControl x:Name="Timeline" Grid.Column="1" Margin="14,0" VerticalAlignment="Center" InteractionStarted="Timeline_InteractionStarted" ValueChangedByUser="Timeline_ValueChangedByUser" InteractionCompleted="Timeline_InteractionCompleted"/><TextBlock x:Name="CurrentTime" Grid.Column="2" Text="00:00 / 00:00" VerticalAlignment="Center" Foreground="#C4C6CE"/></Grid></Border>
+        </Grid>
+        </vlc:VideoView>
+      </Border>
+      <Border Grid.Column="2" Background="{StaticResource Panel}" CornerRadius="12" Padding="22">
+        <ScrollViewer VerticalScrollBarVisibility="Auto"><StackPanel>
+          <TextBlock Text="切り出す範囲" FontSize="17" FontWeight="SemiBold"/>
+          <Grid Margin="0,16,0,4"><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="12"/><ColumnDefinition/></Grid.ColumnDefinitions><StackPanel><TextBlock Text="開始" Foreground="#999DAA"/><TextBox x:Name="StartText" Text="00:00.000" Margin="0,5,0,0" LostFocus="TimeText_LostFocus"/></StackPanel><StackPanel Grid.Column="2"><TextBlock Text="終了" Foreground="#999DAA"/><TextBox x:Name="EndText" Text="00:00.000" Margin="0,5,0,0" LostFocus="TimeText_LostFocus"/></StackPanel></Grid>
+          <Border Background="#222530" CornerRadius="7" Padding="10,8" Margin="0,12,0,0"><TextBlock Text="● 白: 再生位置　▮ 紫: 開始・終了" Foreground="#AEB1BD" FontSize="12"/></Border>
+          <DockPanel Margin="0,10,0,20"><TextBlock x:Name="SelectionLength" Text="選択: 0秒" Foreground="#B8BBC6"/><Button Content="現在位置を開始" DockPanel.Dock="Right" Padding="8,5" Click="SetStart_Click"/><Button Content="現在位置を終了" DockPanel.Dock="Right" Padding="8,5" Margin="0,0,6,0" Click="SetEnd_Click"/></DockPanel>
+          <Separator Background="#30333C"/>
+          <TextBlock Text="出力方法" FontSize="17" FontWeight="SemiBold" Margin="0,18,0,12"/>
+          <RadioButton x:Name="CompressMode" Content="5MB以内に圧縮（おすすめ）" IsChecked="True" Checked="Mode_Changed"/>
+          <TextBlock Text="画質を保てる範囲で自動調整します" Foreground="#858996" FontSize="12" Margin="22,4,0,12"/>
+          <RadioButton x:Name="TrimMode" Content="高速トリミング（再圧縮なし）" Checked="Mode_Changed"/>
+          <TextBlock Text="切り位置が数秒ずれる場合があります" Foreground="#858996" FontSize="12" Margin="22,4,0,16"/>
+          <Grid><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="90"/></Grid.ColumnDefinitions><TextBlock Text="上限サイズ" VerticalAlignment="Center"/><TextBox x:Name="TargetSizeText" Grid.Column="1" Text="5.0 MB" IsReadOnly="True" TextAlignment="Center"/></Grid>
+          <Border Background="#222530" CornerRadius="8" Padding="12" Margin="0,12,0,0"><StackPanel><TextBlock x:Name="EstimateText" Text="動画を選択すると概算を表示します" Foreground="#C7C9D2"/><TextBlock x:Name="AdviceText" TextWrapping="Wrap" Foreground="#8D91A0" FontSize="12" Margin="0,5,0,0"/></StackPanel></Border>
+        </StackPanel></ScrollViewer>
+      </Border>
+    </Grid>
+    <Grid Grid.Row="2" Margin="0,20,0,0"><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><StackPanel VerticalAlignment="Center"><TextBlock x:Name="FileNameText" Text="動画が選択されていません" Foreground="#A1A4AF" TextTrimming="CharacterEllipsis"/><ProgressBar x:Name="Progress" Height="4" Margin="0,8,20,0" Minimum="0" Maximum="100" Visibility="Collapsed" Foreground="#6C63FF" Background="#272A32"/></StackPanel><Button x:Name="ExportButton" Grid.Column="1" Content="書き出す" Background="#6C63FF" Padding="28,12" IsEnabled="False" Click="Export_Click"/></Grid>
+  </Grid>
+</Window>
