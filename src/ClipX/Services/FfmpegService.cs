@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 
@@ -65,6 +66,19 @@ public sealed class FfmpegService
         await process.WaitForExitAsync(token);
         if (process.ExitCode != 0) throw new InvalidOperationException($"ffmpegが終了コード {process.ExitCode} で失敗しました。");
         progress.Report(100);
+    }
+
+    public async Task CaptureFrameAsync(string input, double atSeconds, string output, CancellationToken token)
+    {
+        var args = $"-y -ss {F(atSeconds)} -i {Q(input)} -frames:v 1 {Q(output)}";
+        var psi = new ProcessStartInfo(FfmpegPath, args) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardError = true };
+        using var process = Process.Start(psi) ?? throw new InvalidOperationException("ffmpegを起動できませんでした。");
+        using var registration = token.Register(() => { try { process.Kill(true); } catch { } });
+        var stderr = new StringBuilder();
+        while (await process.StandardError.ReadLineAsync(token) is { } line) stderr.AppendLine(line);
+        await process.WaitForExitAsync(token);
+        if (process.ExitCode != 0) throw new InvalidOperationException($"ffmpegが終了コード {process.ExitCode} で失敗しました。");
+        if (!File.Exists(output)) throw new InvalidOperationException("この位置のフレームを取得できませんでした。");
     }
 
     private static async Task<string> CaptureAsync(string exe, string args)

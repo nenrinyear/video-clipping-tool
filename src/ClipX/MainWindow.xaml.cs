@@ -59,7 +59,7 @@ public partial class MainWindow : Window
         {
             playing = false; playerReady = false; currentPosition = 0; mediaPlayer.Stop();
             vlcMedia?.Dispose(); vlcMedia = null;
-            FileNameText.Text = "動画を解析中…"; ExportButton.IsEnabled = false;
+            FileNameText.Text = "動画を解析中…"; ExportButton.IsEnabled = false; SnapshotButton.IsEnabled = false;
             media = await ffmpeg.ProbeAsync(path); inputPath = path;
             DropHint.Visibility = Visibility.Collapsed;
             Timeline.Duration = media.DurationSeconds;
@@ -79,7 +79,7 @@ public partial class MainWindow : Window
             mediaPlayer.Time = 0;
             playerReady = true;
             FileNameText.Text = $"{Path.GetFileName(path)}  •  {media.Width}×{media.Height}  •  {media.SizeBytes / 1_000_000d:0.0} MB";
-            UpdateRangeUi(); ExportButton.IsEnabled = true;
+            UpdateRangeUi(); ExportButton.IsEnabled = true; SnapshotButton.IsEnabled = true;
         }
         catch (Exception ex) { MessageBox.Show("動画を読み込めませんでした。\n" + ex.Message, "ClipX", MessageBoxButton.OK, MessageBoxImage.Error); FileNameText.Text = "読み込みに失敗しました"; }
     }
@@ -188,6 +188,21 @@ public partial class MainWindow : Window
         }
         catch (Exception ex) { MessageBox.Show("書き出しに失敗しました。\n" + ex.Message, "ClipX", MessageBoxButton.OK, MessageBoxImage.Error); }
         finally { ExportButton.Content = "書き出す"; Progress.Visibility = Visibility.Collapsed; UpdateRangeUi(); }
+    }
+    private async void Snapshot_Click(object sender, RoutedEventArgs e)
+    {
+        if (inputPath is null || media is null || !playerReady) return;
+        // Capture the frame the player is actually showing, not the 10Hz-cached position.
+        var at = Math.Clamp(mediaPlayer.Time / 1000d, 0, Math.Max(0, media.DurationSeconds - 0.001));
+        var save = new SaveFileDialog { Filter = "PNG画像|*.png|JPEG画像|*.jpg;*.jpeg", FileName = $"{Path.GetFileNameWithoutExtension(inputPath)}_{Format(at, true).Replace(':', 'm')}.png", InitialDirectory = Path.GetDirectoryName(inputPath) };
+        if (save.ShowDialog() != true) return;
+        try
+        {
+            await ffmpeg.CaptureFrameAsync(inputPath, at, save.FileName, CancellationToken.None);
+            var size = new FileInfo(save.FileName).Length / 1024d;
+            MessageBox.Show($"{Format(at, true)} のフレームを保存しました。\n{Path.GetFileName(save.FileName)}\n{size:0.#} KB", "ClipX", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+        catch (Exception ex) { MessageBox.Show("フレームを保存できませんでした。\n" + ex.Message, "ClipX", MessageBoxButton.OK, MessageBoxImage.Error); }
     }
     private static string Format(double seconds, bool millis) { var t = TimeSpan.FromSeconds(Math.Max(0, seconds)); return millis ? $"{(int)t.TotalMinutes:00}:{t.Seconds:00}.{t.Milliseconds:000}" : $"{(int)t.TotalMinutes:00}:{t.Seconds:00}"; }
     private static bool TryParseTime(string text, out double seconds) { seconds = 0; var p = text.Trim().Split(':'); if (p.Length != 2 || !double.TryParse(p[0], out var min) || !double.TryParse(p[1], out var sec)) return false; seconds = min * 60 + sec; return seconds >= 0; }
