@@ -70,6 +70,22 @@ dotnet publish src/ClipX/ClipX.csproj -c Release -r win-x64 --self-contained tru
 
 LibVLCのDLLと`libvlc`フォルダーはpublish出力へ自動的に含まれます。FFmpegを同梱する場合は、使用するビルドのライセンス条件とソース提供義務を確認してください。
 
+## Releases
+
+`v*` で始まるGitタグをpushすると、GitHub Actionsがwin-x64のself-contained単一exeビルドを公開します（`.github/workflows/release.yml`）。
+
+1. win-x64でself-contained単一ファイルpublish（`ClipX.exe`）
+2. 使用しない`libvlc/win-x86`・`libvlc/win-arm64`を削除
+3. FFmpeg（BtbNのGPLビルド、ワークフロー内でpin済み）を`tools/ffmpeg.exe`・`tools/ffprobe.exe`として同梱
+4. `ClipX-<tag>-win-x64.zip`としてGitHub Releaseにアップロード
+
+公開するには：
+
+```powershell
+git tag v0.1.0
+git push origin v0.1.0
+```
+
 ## 5 MB mode
 
 映像、音声、MP4コンテナを含めて5,000,000 bytes未満になるよう、6%の安全余裕を取ってビットレートを計算します。エンコーダーの誤差があるため厳密な保証ではありません。必要な映像ビットレートが低すぎる場合は、画質劣化を避けるため範囲短縮を案内します。
