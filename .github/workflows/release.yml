@@ -35,6 +35,9 @@ jobs:
           New-Item -ItemType Directory publish/ClipX/tools
           Copy-Item ffmpeg-*/bin/ffmpeg.exe publish/ClipX/tools/
           Copy-Item ffmpeg-*/bin/ffprobe.exe publish/ClipX/tools/
+          # Keep the bundled build's license and copyright notices inside the zip.
+          Copy-Item ffmpeg-*/LICENSE.txt, ffmpeg-*/README.txt publish/ClipX/tools/ -ErrorAction SilentlyContinue
+          Get-ChildItem ffmpeg-*/COPYING* | ForEach-Object { Copy-Item $_.FullName publish/ClipX/tools/ }
 
       - name: Zip
         run: Compress-Archive -Path publish/ClipX -DestinationPath "ClipX-${{ github.ref_name }}-win-x64.zip"
